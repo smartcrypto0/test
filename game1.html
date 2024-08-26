@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kid-Friendly Endless Runner Game</title>
     <style>
         body {
@@ -11,12 +11,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #87CEEB;
             font-family: Arial, sans-serif;
+            touch-action: manipulation;
         }
         #game-container {
-            width: 800px;
+            width: 100%;
+            max-width: 800px;
             height: 200px;
             background-color: #9DE0AD;
             position: relative;
@@ -34,7 +36,7 @@
             height: 40px;
             position: absolute;
             bottom: 0;
-            left: 800px;
+            left: 100%;
         }
         #score {
             position: absolute;
@@ -53,6 +55,20 @@
             background-color: rgba(255, 255, 255, 0.8);
             padding: 20px;
             border-radius: 10px;
+            text-align: center;
+        }
+        #jump-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -68,14 +84,16 @@
             </svg>
         </div>
         <div id="score">Score: 0</div>
-        <div id="game-over">Game Over! Press Space to restart</div>
+        <div id="game-over">Game Over!<br>Tap to restart</div>
     </div>
+    <button id="jump-button">Jump</button>
 
     <script>
         let character;
         let scoreElement;
         let gameOverElement;
         let gameContainer;
+        let jumpButton;
         let isJumping = false;
         let score = 0;
         let gameLoop;
@@ -85,6 +103,7 @@
             scoreElement = document.getElementById('score');
             gameOverElement = document.getElementById('game-over');
             gameContainer = document.getElementById('game-container');
+            jumpButton = document.getElementById('jump-button');
         }
 
         function jump() {
@@ -124,7 +143,7 @@
             `;
             gameContainer.appendChild(obstacle);
 
-            let obstaclePosition = 800;
+            let obstaclePosition = gameContainer.offsetWidth;
             const moveObstacle = setInterval(() => {
                 if (obstaclePosition > -40) {
                     obstaclePosition -= 5;
@@ -135,6 +154,7 @@
                         clearInterval(moveObstacle);
                         clearInterval(gameLoop);
                         gameOverElement.style.display = 'block';
+                        jumpButton.style.display = 'none';
                     }
                 } else {
                     clearInterval(moveObstacle);
@@ -149,6 +169,7 @@
             score = 0;
             scoreElement.textContent = 'Score: 0';
             gameOverElement.style.display = 'none';
+            jumpButton.style.display = 'block';
             gameContainer.innerHTML = `
                 <div id="character">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -160,24 +181,36 @@
                     </svg>
                 </div>
                 <div id="score">Score: 0</div>
-                <div id="game-over">Game Over! Press Space to restart</div>
+                <div id="game-over">Game Over!<br>Tap to restart</div>
             `;
             initializeElements();
             gameLoop = setInterval(createObstacle, 2000);
         }
 
-        document.addEventListener('keydown', (event) => {
-            if (event.code === 'Space') {
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeElements();
+            startGame();
+
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space') {
+                    if (gameOverElement.style.display === 'block') {
+                        startGame();
+                    } else {
+                        jump();
+                    }
+                }
+            });
+
+            jumpButton.addEventListener('click', () => {
+                jump();
+            });
+
+            gameContainer.addEventListener('click', () => {
                 if (gameOverElement.style.display === 'block') {
                     startGame();
-                } else {
-                    jump();
                 }
-            }
+            });
         });
-
-        initializeElements();
-        startGame();
     </script>
 </body>
 </html>
